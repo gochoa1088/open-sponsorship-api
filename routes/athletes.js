@@ -11,7 +11,12 @@ router.get("/", (req, res) => {
 
 router.get("/:id", (req, res) => {
   Athlete.findById(req.params.id)
-    .then((athlete) => res.json(athlete))
+    .then((athlete) => {
+      if (!athlete) {
+        throw new Error(`No athlete exists with id ${req.params.id}`);
+      }
+      res.json(athlete);
+    })
     .catch((err) => res.status(400).json(err));
 });
 
@@ -23,6 +28,16 @@ router.post("/add", (req, res) => {
     .save()
     .then((doc) => {
       return res.json({ message: "Athlete added!", id: doc._id });
+    })
+    .catch((err) => res.status(400).json(err));
+});
+
+router.put("/update/:id", (req, res) => {
+  const updatedField = req.body;
+
+  Athlete.findOneAndUpdate({ _id: req.params.id }, updatedField)
+    .then((doc) => {
+      return res.json({ message: "Athlete updated!", id: doc._id });
     })
     .catch((err) => res.status(400).json(err));
 });
